@@ -1,34 +1,60 @@
-# Gradle files
-.gradle/
-build/
+<!doctype html>
+<html lang="ar">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>افتح واتساب ورسالة جاهزة</title>
+<style>
+  body{display:flex;align-items:center;justify-content:center;height:100vh;margin:0;background:#f8f9fa;font-family:Arial}
+  .card{background:#fff;padding:18px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,.08);text-align:center;max-width:420px}
+  button{background:#25D366;color:#fff;border:0;padding:12px 18px;border-radius:8px;font-size:16px;cursor:pointer}
+  input, textarea{width:100%;margin-top:8px;padding:8px;border:1px solid #ddd;border-radius:6px;box-sizing:border-box}
+  label{display:block;text-align:left;font-size:13px;color:#333;margin-top:8px}
+</style>
+</head>
+<body>
+  <div class="card">
+    <h3>فتح واتساب وتحضير رسالة</h3>
 
-# Local configuration file (sdk path, etc)
-local.properties
+    <label>رقم الهاتف (بالصيغة الدولية، بدون + أو 00)</label>
+    <input id="phone" placeholder="مثال: 201234567890 (مصر: 20...)" value="201234567890">
 
-# Log/OS Files
-*.log
+    <label>نص الرسالة</label>
+    <textarea id="msg" rows="4">مرحباً، هذا نص تجريبي. غيّره كما تريد.</textarea>
 
-# Android Studio generated files and folders
-captures/
-.externalNativeBuild/
-.cxx/
-*.aab
-*.apk
-output-metadata.json
+    <button id="open">افتح واتساب وابدأ المحادثة</button>
+    <p style="font-size:12px;color:#666;margin-top:10px">سيظهر مربع كتابة في واتساب؛ يجب عليك الضغط على إرسال بنفسك.</p>
+  </div>
 
-# IntelliJ
-*.iml
-.idea/
-misc.xml
-deploymentTargetDropDown.xml
-render.experimental.xml
+<script>
+document.getElementById('open').addEventListener('click', function(){
+  const phone = document.getElementById('phone').value.replace(/\D/g,''); // نحذف أي رموز
+  let text = document.getElementById('msg').value;
 
-# Keystore files
-*.jks
-*.keystore
+  if(!phone){
+    alert('اكتب رقم هاتف صحيح بالصيغة الدولية (مثال: 201234567890)');
+    return;
+  }
 
-# Google Services (e.g. APIs or Firebase)
-google-services.json
+  // ترميز النص لعنوان URL
+  const encoded = encodeURIComponent(text);
 
-# Android Profiling
-*.hprof
+  // URI التطبيق (محاولة فتح تطبيق واتساب مباشرة)
+  const appUri = 'whatsapp://send?phone=' + phone + '&text=' + encoded;
+
+  // fallback: رابط wa.me الرسمي (يفتح صفحة ويب ثم يعرض خيار الفتح للتطبيق)
+  const webUri = 'https://wa.me/' + phone + '?text=' + encoded;
+
+  // نحاول فتح appUri أولاً؛ إن لم يفتح خلال 0.8s ننتقل للـ wa.me
+  const now = Date.now();
+  window.location = appUri;
+
+  setTimeout(function(){
+    if (Date.now() - now < 1200){
+      window.location = webUri;
+    }
+  }, 700);
+});
+</script>
+</body>
+</html>
